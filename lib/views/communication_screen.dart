@@ -10,7 +10,7 @@ class CommunicationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Communication Method'),
+        title: Text('Hello'),
       ),
       body: Center(
         child: Column(
