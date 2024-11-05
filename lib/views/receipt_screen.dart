@@ -1,10 +1,10 @@
-// lib/views/receipt_screen.dart
-
 import 'package:flutter/material.dart';
 import '../models/receipt.dart';
+
 import '../models/tax_info_decorator.dart';
 import '../models/appreciation_decorator.dart';
 import '../models/footer_decorator.dart';
+import '../data/database_helper.dart'; // Import DatabaseHelper
 
 class ReceiptScreen extends StatefulWidget {
   @override
@@ -21,7 +21,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   String? generatedReceipt;
 
-  void generateReceipt() {
+  void generateAndStoreReceipt() {
     String donorName = donorNameController.text;
     double amount = double.tryParse(amountController.text) ?? 0;
 
@@ -40,6 +40,17 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
     setState(() {
       generatedReceipt = receipt.generate();
+    });
+
+    // Store the receipt in the database
+    DatabaseHelper.instance.insertReceipt(receipt.toJson()).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Receipt generated and stored successfully!'))
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error storing receipt: $error'))
+      );
     });
   }
 
@@ -91,8 +102,8 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: generateReceipt,
-              child: Text('Generate Receipt'),
+              onPressed: generateAndStoreReceipt,
+              child: Text('Generate and Store Receipt'),
             ),
             SizedBox(height: 20),
             if (generatedReceipt != null)

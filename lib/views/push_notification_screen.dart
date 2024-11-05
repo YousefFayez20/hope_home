@@ -1,5 +1,3 @@
-// lib/views/push_notification_screen.dart
-
 import 'package:flutter/material.dart';
 import '../controllers/communication_controller.dart';
 import '../models/communication_strategy.dart';
@@ -19,7 +17,7 @@ class PushNotificationScreen extends StatelessWidget {
     String message = messageController.text;
     controller.notifyUser(recipient, message);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Push Notification sent to $recipient')),
+        SnackBar(content: Text('Push Notification sent to $recipient'))
     );
   }
 

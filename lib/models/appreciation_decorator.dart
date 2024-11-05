@@ -1,5 +1,3 @@
-// lib/models/appreciation_decorator.dart
-
 import 'receipt.dart';
 
 class AppreciationDecorator implements Receipt {
@@ -10,5 +8,12 @@ class AppreciationDecorator implements Receipt {
   @override
   String generate() {
     return "${receipt.generate()}\nThank you for your generous donation!";
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var baseJson = receipt.toJson();
+    baseJson.addAll({'appreciation': 'Thank you for your generous donation!'});
+    return baseJson;
   }
 }

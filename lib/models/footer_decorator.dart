@@ -1,5 +1,3 @@
-// lib/models/footer_decorator.dart
-
 import 'receipt.dart';
 
 class FooterDecorator implements Receipt {
@@ -10,5 +8,14 @@ class FooterDecorator implements Receipt {
   @override
   String generate() {
     return "${receipt.generate()}\n\nOrphanage Management System\nContact us at: contact@orphanage.org";
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var baseJson = receipt.toJson();
+    baseJson.addAll({
+      'footer': 'Orphanage Management System\nContact us at: contact@orphanage.org'
+    });
+    return baseJson;
   }
 }

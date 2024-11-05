@@ -1,5 +1,3 @@
-// lib/views/communication_screen.dart
-
 import 'package:flutter/material.dart';
 import 'email_screen.dart';
 import 'sms_screen.dart';
@@ -10,7 +8,7 @@ class CommunicationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hello'),
+        title: Text('Select Communication Method'),
       ),
       body: Center(
         child: Column(

@@ -1,5 +1,3 @@
-// lib/views/sms_screen.dart
-
 import 'package:flutter/material.dart';
 import '../controllers/communication_controller.dart';
 import '../models/communication_strategy.dart';
@@ -19,7 +17,7 @@ class SMSScreen extends StatelessWidget {
     String message = messageController.text;
     controller.notifyUser(recipient, message);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('SMS sent to $recipient')),
+        SnackBar(content: Text('SMS sent to $recipient'))
     );
   }
 

@@ -1,5 +1,3 @@
-// lib/views/start_screen.dart
-
 import 'package:flutter/material.dart';
 import 'communication_screen.dart';
 
@@ -15,6 +13,12 @@ class StartScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              'Welcome to the Orphanage Management System',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
