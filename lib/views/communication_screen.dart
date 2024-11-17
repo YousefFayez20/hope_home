@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hope_home/views/whatsapp_screen.dart';
 import 'email_screen.dart';
 import 'sms_screen.dart';
 import 'push_notification_screen.dart';
@@ -31,6 +32,14 @@ class CommunicationScreen extends StatelessWidget {
                 );
               },
               child: Text('Send SMS'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => WhatsappMessageScreen()),
+                );
+              },              child: Text('Send Whatsapp Message'),
             ),
             ElevatedButton(
               onPressed: () {
