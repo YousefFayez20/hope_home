@@ -28,5 +28,11 @@ class PushNotificationStrategy implements CommunicationStrategy {
   void sendMessage(String recipient, String message) {
     print('Sending Push Notification to $recipient: $message');
     // Logic for sending a push notification
+  }}
+  class WhatsappMessageStrategy implements CommunicationStrategy {
+  @override
+  void sendMessage(String recipient, String message) {
+    print('Sending Whatsapp Message to $recipient: $message');
+    // Logic for sending a whatsapp message
   }
-}
+  }

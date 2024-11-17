@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hope_home/models/date_time_decorator.dart';
 import '../models/receipt.dart';
 
 import '../models/tax_info_decorator.dart';
@@ -18,6 +19,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   bool includeTaxInfo = false;
   bool includeAppreciation = false;
   bool includeFooter = false;
+  bool includeDateAndTime = false;
 
   String? generatedReceipt;
 
@@ -37,7 +39,9 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     if (includeFooter) {
       receipt = FooterDecorator(receipt);
     }
-
+    if (includeDateAndTime) {
+      receipt = DateTimeDecorator(receipt);
+    }
     setState(() {
       generatedReceipt = receipt.generate();
     });
@@ -88,6 +92,15 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
               onChanged: (bool? value) {
                 setState(() {
                   includeAppreciation = value ?? false;
+                });
+              },
+            ),
+            CheckboxListTile(
+              title: Text("Add Date & Time "),
+              value: includeDateAndTime,
+              onChanged: (bool? value) {
+                setState(() {
+                  includeDateAndTime = value ?? false;
                 });
               },
             ),
