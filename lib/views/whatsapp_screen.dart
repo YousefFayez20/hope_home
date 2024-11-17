@@ -17,7 +17,7 @@ class WhatsappMessageScreen extends StatelessWidget {
     String message = messageController.text;
     controller.notifyUser(recipient, message);
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Whatsapp message sent to $recipient'))
+        SnackBar(content: Text('WhatsApp message sent to $recipient'))
     );
   }
 
