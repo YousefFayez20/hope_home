@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'dart:convert'; // Necessary for JSON operations
+import 'dart:convert';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Incremented version for schema changes
+      version: 2,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -37,7 +37,6 @@ class DatabaseHelper {
     ''');
 
     if (version >= 2) {
-      // Create receipts table if the version is 2 or higher
       await db.execute('''
         CREATE TABLE receipts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,16 +57,91 @@ class DatabaseHelper {
     }
   }
 
-  // Receipts Methods
+  Future<int> insertDonation(String donorName, double amount, String donationType) async {
+    try {
+      final db = await database;
+      return await db.insert('donations', {
+        'donorName': donorName,
+        'amount': amount,
+        'donationType': donationType,
+      });
+    } catch (e) {
+      print("Error inserting donation: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> updateDonation(int id, String donorName, double amount, String donationType) async {
+    try {
+      final db = await database;
+      await db.update(
+        'donations',
+        {
+          'donorName': donorName,
+          'amount': amount,
+          'donationType': donationType,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print("Error updating donation: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> deleteDonation(int id) async {
+    try {
+      final db = await database;
+      await db.delete(
+        'donations',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print("Error deleting donation: $e");
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getDonationById(int id) async {
+    try {
+      final db = await database;
+      final result = await db.query(
+        'donations',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      return result.isNotEmpty ? result.first : null;
+    } catch (e) {
+      print("Error fetching donation by ID: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDonations() async {
+    try {
+      final db = await database;
+      return await db.query('donations', orderBy: 'id DESC');
+    } catch (e) {
+      print("Error fetching donations: $e");
+      rethrow;
+    }
+  }
+
   Future<void> insertReceipt(Map<String, dynamic> receiptData) async {
     final db = await database;
     await db.insert('receipts', {'receiptData': jsonEncode(receiptData)});
   }
 
+
   Future<List<Map<String, dynamic>>> getReceipts() async {
     final db = await database;
     final results = await db.query('receipts');
-    return results.map((map) => jsonDecode(map['receiptData'] as String) as Map<String, dynamic>).toList();
+    return results
+        .map((map) => jsonDecode(map['receiptData'] as String) as Map<String, dynamic>)
+        .toList();
   }
 
   Future<void> deleteReceipt(int id) async {
@@ -77,43 +151,5 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-  }
-
-  // Existing Donation Methods
-  // Insert new donation
-  Future<void> insertDonation(String donorName, double amount, String donationType) async {
-    final db = await database;
-    await db.insert('donations', {
-      'donorName': donorName,
-      'amount': amount,
-      'donationType': donationType,
-    });
-  }
-
-  // Update a donation
-  Future<void> updateDonation(int id, String donorName, double amount, String donationType) async {
-    final db = await database;
-    await db.update(
-      'donations',
-      {
-        'donorName': donorName,
-        'amount': amount,
-        'donationType': donationType,
-      },
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  // Delete a donation
-  Future<void> deleteDonation(int id) async {
-    final db = await database;
-    await db.delete('donations', where: 'id = ?', whereArgs: [id]);
-  }
-
-  // Get all donations
-  Future<List<Map<String, dynamic>>> getDonations() async {
-    final db = await database;
-    return await db.query('donations', orderBy: 'id DESC');
   }
 }
