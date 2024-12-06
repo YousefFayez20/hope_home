@@ -15,17 +15,8 @@ class AddDonationCommand implements Command {
   }
 
   @override
-  void undo() {
-    print("Undo not implemented for AddDonationCommand.");
-  }
-  Future<double> calculateTotalDonations() async {
-    final List<Map<String, dynamic>> donations = await donationManager.databaseHelper.getDonations();
-    final double total = donations.fold(0.0, (total, donation) {
-      final double amount = (donation['amount'] as num).toDouble();
-      return total + amount;
-    });
-
-    return total;
+  Future<void> undo() async {
+    // Undo is not required for AddDonationCommand.
   }
 }
 
@@ -49,7 +40,7 @@ class DeleteDonationCommand implements Command {
     if (deletedDonation != null) {
       await donationManager.addDonation(
         deletedDonation!['donorName'],
-        deletedDonation!['amount'],
+        (deletedDonation!['amount'] as num).toDouble(),
         deletedDonation!['donationType'],
       );
     }
@@ -63,8 +54,6 @@ class UpdateDonationCommand implements Command {
   final double newAmount;
   final String newDonationType;
 
-  Map<String, dynamic>? previousDonation;
-
   UpdateDonationCommand(
       this.donationManager,
       this.donationId,
@@ -75,26 +64,16 @@ class UpdateDonationCommand implements Command {
 
   @override
   Future<void> execute() async {
-    previousDonation = await donationManager.getDonationById(donationId);
-    if (previousDonation != null) {
-      await donationManager.updateDonation(
-        donationId,
-        newDonorName,
-        newAmount,
-        newDonationType,
-      );
-    }
+    await donationManager.updateDonation(
+      donationId,
+      newDonorName,
+      newAmount,
+      newDonationType,
+    );
   }
 
   @override
   Future<void> undo() async {
-    if (previousDonation != null) {
-      await donationManager.updateDonation(
-        donationId,
-        previousDonation!['donorName'],
-        previousDonation!['amount'],
-        previousDonation!['donationType'],
-      );
-    }
+    print("Undo not implemented for UpdateDonationCommand.");
   }
 }

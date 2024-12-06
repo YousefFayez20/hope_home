@@ -1,3 +1,4 @@
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
@@ -30,9 +31,9 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE donations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        donorName TEXT,
-        amount REAL,
-        donationType TEXT
+        donorName TEXT NOT NULL,
+        amount REAL NOT NULL,
+        donationType TEXT NOT NULL
       )
     ''');
 
@@ -40,7 +41,7 @@ class DatabaseHelper {
       await db.execute('''
         CREATE TABLE receipts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          receiptData TEXT
+          receiptData TEXT NOT NULL
         )
       ''');
     }
@@ -51,12 +52,15 @@ class DatabaseHelper {
       await db.execute('''
         CREATE TABLE receipts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          receiptData TEXT
+          receiptData TEXT NOT NULL
         )
       ''');
     }
   }
 
+  // ---------------- Donation Methods ----------------
+
+  /// Insert a new donation and return its ID
   Future<int> insertDonation(String donorName, double amount, String donationType) async {
     try {
       final db = await database;
@@ -71,6 +75,7 @@ class DatabaseHelper {
     }
   }
 
+  /// Update an existing donation
   Future<void> updateDonation(int id, String donorName, double amount, String donationType) async {
     try {
       final db = await database;
@@ -90,6 +95,7 @@ class DatabaseHelper {
     }
   }
 
+  /// Delete a donation by ID
   Future<void> deleteDonation(int id) async {
     try {
       final db = await database;
@@ -104,6 +110,7 @@ class DatabaseHelper {
     }
   }
 
+  /// Fetch a specific donation by ID
   Future<Map<String, dynamic>?> getDonationById(int id) async {
     try {
       final db = await database;
@@ -120,6 +127,7 @@ class DatabaseHelper {
     }
   }
 
+  /// Fetch all donations
   Future<List<Map<String, dynamic>>> getDonations() async {
     try {
       final db = await database;
@@ -130,26 +138,61 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> insertReceipt(Map<String, dynamic> receiptData) async {
-    final db = await database;
-    await db.insert('receipts', {'receiptData': jsonEncode(receiptData)});
+  // ---------------- Receipt Methods ----------------
+
+  /// Insert a new receipt
+  Future<int> insertReceipt(Map<String, dynamic> receiptData) async {
+    try {
+      final db = await database;
+      return await db.insert('receipts', {'receiptData': jsonEncode(receiptData)});
+    } catch (e) {
+      print("Error inserting receipt: $e");
+      rethrow;
+    }
   }
 
-
+  /// Fetch all receipts
   Future<List<Map<String, dynamic>>> getReceipts() async {
-    final db = await database;
-    final results = await db.query('receipts');
-    return results
-        .map((map) => jsonDecode(map['receiptData'] as String) as Map<String, dynamic>)
-        .toList();
+    try {
+      final db = await database;
+      final results = await db.query('receipts');
+      return results
+          .map((map) => jsonDecode(map['receiptData'] as String) as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      print("Error fetching receipts: $e");
+      rethrow;
+    }
   }
 
+  /// Delete a receipt by ID
   Future<void> deleteReceipt(int id) async {
-    final db = await database;
-    await db.delete(
-      'receipts',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    try {
+      final db = await database;
+      await db.delete(
+        'receipts',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print("Error deleting receipt: $e");
+      rethrow;
+    }
   }
+
+  // ---------------- Database Utility Methods ----------------
+
+  /// Delete the entire database (useful for debugging)
+  Future<void> deleteDatabase() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'donations.db');
+
+    final db = await database;
+    await db.close(); // Close the resolved database instance
+
+    await sqflite.deleteDatabase(path); // Delete the database file
+
+    _database = null; // Reset the database instance
+  }
+
 }
