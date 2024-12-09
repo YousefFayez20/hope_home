@@ -1,6 +1,3 @@
-
-// lib/controllers/communication_controller.dart
-
 import '../models/communication_strategy.dart';
 
 class CommunicationController {
@@ -12,9 +9,21 @@ class CommunicationController {
 
   void notifyUser(String recipient, String message) {
     if (_strategy == null) {
-      print('Communication strategy is not set.');
+      print('Error: Communication strategy is not set.');
       return;
     }
-    _strategy!.sendMessage(recipient, message);
+    try {
+      _strategy!.sendMessage(recipient, message);
+    } catch (e) {
+      print('Error sending notification: $e');
+    }
+  }
+
+  bool hasStrategy() {
+    return _strategy != null;
+  }
+
+  void logNotification(String recipient, String message) {
+    print('Notification logged for $recipient: $message');
   }
 }

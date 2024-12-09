@@ -1,136 +1,81 @@
 import 'command.dart';
-import '../controllers/communication_controller.dart';
 
-class SendNotificationCommand implements Command {
-  final CommunicationController communicationController;
-  final String recipient;
-  final String message;
+/// Command for logging actions performed in the system
+class LogActionCommand implements Command {
+  final String actionType; // The type of action performed (e.g., Add Donation, Update Donation)
+  final String message; // A detailed message describing the action
+  final List<Map<String, String>> logList; // Shared log list to track all actions
 
-  SendNotificationCommand(this.communicationController, this.recipient, this.message);
+  LogActionCommand(this.actionType, this.message, this.logList);
 
   @override
   Future<void> execute() async {
-    try {
-      communicationController.notifyUser(recipient, message);
-      print("Notification sent to $recipient.");
-    } catch (e) {
-      print("Error sending notification to $recipient: $e");
-    }
+    // Add the action details to the log list
+    logList.add({'action': actionType, 'message': message});
+    print("Action logged: $actionType - $message");
+    return; // Explicitly return Future<void>
   }
 
   @override
-  void undo() {
-    print("Undo not applicable for SendNotificationCommand.");
-  }
-
-  bool isRecipientValid() {
-    return recipient.contains("@") || RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(recipient);
+  Future<void> undo() async {
+    // Undo is not applicable for this log command
+    print("Undo not applicable for LogActionCommand.");
+    return; // Explicitly return Future<void>
   }
 }
 
-class SendBulkNotificationsCommand implements Command {
-  final CommunicationController communicationController;
-  final List<String> recipients;
-  final String message;
+/// Command for clearing all logs
+class ClearLogsCommand implements Command {
+  final List<Map<String, String>> logList; // Reference to the shared log list
 
-  SendBulkNotificationsCommand(this.communicationController, this.recipients, this.message);
+  ClearLogsCommand(this.logList);
 
   @override
   Future<void> execute() async {
-    List<String> failedRecipients = [];
-
-    for (String recipient in recipients) {
-      try {
-        communicationController.notifyUser(recipient, message);
-        print("Notification sent to $recipient.");
-      } catch (e) {
-        print("Error sending notification to $recipient: $e");
-        failedRecipients.add(recipient);
-      }
-    }
-
-    if (failedRecipients.isNotEmpty) {
-      print("Failed to send notifications to the following recipients: ${failedRecipients.join(', ')}");
-    }
+    // Clear the log list
+    logList.clear();
+    print("All logs cleared.");
+    return; // Explicitly return Future<void>
   }
 
   @override
-  void undo() {
-    print("Undo not applicable for bulk notifications.");
+  Future<void> undo() async {
+    // Undo is not applicable for clearing logs
+    print("Undo not applicable for ClearLogsCommand.");
+    return; // Explicitly return Future<void>
   }
 }
 
-class ResendNotificationCommand implements Command {
-  final CommunicationController communicationController;
-  final String recipient;
-  final String message;
+/// Command to filter logs based on action type
+class FilterLogsCommand implements Command {
+  final String filterActionType; // The action type to filter by (e.g., Add Donation)
+  final List<Map<String, String>> logList; // Reference to the shared log list
 
-  ResendNotificationCommand(this.communicationController, this.recipient, this.message);
+  FilterLogsCommand(this.filterActionType, this.logList);
+
+  Future<List<Map<String, String>>> executeWithFilter() async {
+    // Filter the logs by the specified action type
+    final filteredLogs = logList
+        .where((log) => log['action'] == filterActionType)
+        .toList();
+    print("Filtered logs for action type: $filterActionType");
+    return filteredLogs;
+  }
 
   @override
   Future<void> execute() async {
-    try {
-      communicationController.notifyUser(recipient, message);
-      print("Notification resent to $recipient.");
-    } catch (e) {
-      print("Error resending notification to $recipient: $e");
-    }
+    // Optionally, print the filtered logs directly
+    final filteredLogs = await executeWithFilter();
+    filteredLogs.forEach((log) {
+      print("Filtered Log - Action: ${log['action']}, Message: ${log['message']}");
+    });
+    return; // Explicitly return Future<void>
   }
 
   @override
-  void undo() {
-    print("Undo not applicable for ResendNotificationCommand.");
-  }
-}
-
-class ScheduleNotificationCommand implements Command {
-  final CommunicationController communicationController;
-  final String recipient;
-  final String message;
-  final DateTime scheduleTime;
-
-  ScheduleNotificationCommand(
-      this.communicationController,
-      this.recipient,
-      this.message,
-      this.scheduleTime,
-      );
-
-  @override
-  Future<void> execute() async {
-    print("Notification scheduled for $scheduleTime to $recipient.");
-    // Add logic to store the notification in a database or queue for scheduling
-  }
-
-  @override
-  void undo() {
-    print("Undo not applicable for ScheduleNotificationCommand.");
-  }
-
-  Duration timeUntilNotification() {
-    return scheduleTime.difference(DateTime.now());
-  }
-}
-
-class LogNotificationCommand implements Command {
-  final String notificationType;
-  final String recipient;
-
-  LogNotificationCommand(this.notificationType, this.recipient);
-
-  @override
-  Future<void> execute() async {
-    print("Notification of type '$notificationType' sent to $recipient.");
-    // Add logic to log the notification in a database or file
-  }
-
-  @override
-  void undo() {
-    print("Undo not applicable for LogNotificationCommand.");
-  }
-
-  bool isLogged() {
-    // Add logic to verify if the notification was logged
-    return true;
+  Future<void> undo() async {
+    // Undo is not applicable for filtering logs
+    print("Undo not applicable for FilterLogsCommand.");
+    return; // Explicitly return Future<void>
   }
 }

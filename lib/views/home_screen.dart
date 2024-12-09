@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'notification_screen.dart';
 import 'communication_screen.dart';
 import 'receipt_screen.dart';
 import 'donation_history.dart';
@@ -17,7 +18,20 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('HopeHome Dashboard')),
+      appBar: AppBar(
+        title: Text('HopeHome Dashboard'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

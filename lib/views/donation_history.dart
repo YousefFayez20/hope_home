@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/donation_commands.dart';
-import '../managers/donation_manager.dart';
 import '../data/database_helper.dart';
+import '../managers/donation_manager.dart';
+import '../models/donation_commands.dart';
 import 'add_donation_screen.dart';
 
 class DonationHistoryScreen extends StatefulWidget {
@@ -11,9 +11,8 @@ class DonationHistoryScreen extends StatefulWidget {
 
 class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
   late Future<List<Map<String, dynamic>>> donations;
-  final DonationManager donationManager = DonationManager(DatabaseHelper.instance);
-
-  DeleteDonationCommand? lastDeleteCommand; // Store the last delete command for undo
+  final DonationManager donationManager = DonationManager(
+      DatabaseHelper.instance);
 
   @override
   void initState() {
@@ -27,51 +26,47 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
     });
   }
 
-  Future<void> _deleteDonation(Map<String, dynamic> donation) async {
-    final deleteCommand = DeleteDonationCommand(donationManager, donation['id']);
+  Future<void> _deleteDonation(int id, String donorName) async {
+    final deleteCommand = DeleteDonationCommand(DatabaseHelper.instance, id);
     await deleteCommand.execute();
-    lastDeleteCommand = deleteCommand; // Store for undo
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Donation deleted successfully.'),
+        content: Text('Donation deleted for $donorName.'),
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () async {
-            await lastDeleteCommand?.undo();
-            if (mounted) {
-              _fetchDonations(); // Refresh list after undo
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Delete operation undone.')),
-              );
-            }
+            await deleteCommand.undo();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Delete operation undone for $donorName.')),
+            );
+            _fetchDonations(); // Refresh the list after undo
           },
         ),
       ),
     );
 
-    _fetchDonations(); // Refresh list after deletion
+    _fetchDonations(); // Refresh the list after deletion
   }
 
-  Future<void> _editDonation(Map<String, dynamic> donation) async {
+  Future<void> _navigateToEditDonation(Map<String, dynamic> donation) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddDonationScreen(
-          donationId: donation['id'],
-          donorName: donation['donorName'],
-          amount: (donation['amount'] as num).toDouble(),
-          donationType: donation['donationType'],
-          onDonationChanged: _fetchDonations, // Notify history screen to refresh
-        ),
+        builder: (context) =>
+            AddDonationScreen(
+              donationId: donation['id'],
+              donorName: donation['donorName'],
+              amount: donation['amount'],
+              donationType: donation['donationType'],
+              onDonationChanged: _fetchDonations,
+            ),
       ),
     );
 
     if (result == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Donation updated for ${donation['donorName']}')),
-      );
-      _fetchDonations(); // Refresh list after editing
+      _fetchDonations(); // Refresh the donation list
     }
   }
 
@@ -104,11 +99,15 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _editDonation(donation),
+                        onPressed: () => _navigateToEditDonation(donation),
                       ),
                       IconButton(
                         icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteDonation(donation),
+                        onPressed: () =>
+                            _deleteDonation(
+                              donation['id'],
+                              donation['donorName'],
+                            ),
                       ),
                     ],
                   ),
@@ -120,4 +119,5 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
       ),
     );
   }
+
 }
